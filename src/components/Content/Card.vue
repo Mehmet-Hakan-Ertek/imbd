@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import { cardStore } from '@/stores/card.js'
 
 const props = defineProps(['poster']);
+const cards = cardStore();
 
-const { poster_path, vote_average, release_date, first_air_date, original_title, name } = props.poster;
+const { poster_path, vote_average, release_date, first_air_date, original_title, name, id } = props.poster;
 
 const image = 'https://image.tmdb.org/t/p/w220_and_h330_face';
 const url = ref(`${ image }${ poster_path }`);
@@ -15,6 +17,12 @@ const title = original_title ?? name;
 
 const canvas = ref();
 const context = ref();
+const isCurrentPosterInWishlist = ref(false);
+
+watch(() => isCurrentPosterInWishlist.value, () => {
+  isCurrentPosterInWishlist.value = isInWishlist();
+}, { immediate: true });
+
 
 onMounted(() => {
   context.value = canvas.value?.getContext('2d');
@@ -48,6 +56,21 @@ function convertDate(dateValue) {
   return `${month} ${day}, ${year}`;
 }
 
+function addToWishlist() {
+  if (!isInWishlist()) {
+    cards.addItems(id);
+  } else {
+    cards.removeItems(id);
+  }
+
+  isCurrentPosterInWishlist.value = isInWishlist();
+}
+
+function isInWishlist() {
+  const favoritedMovies = cards.getItems;
+
+  return favoritedMovies.includes(id);
+}
 </script>
 
 <template>
@@ -61,7 +84,7 @@ function convertDate(dateValue) {
       </div>
       <div class="poster-title text-base font-bold">{{ title }}</div>
       <div class="poster-release-date">{{ date }}</div>
-      <div class="poster-star text-[24px] absolute top-0 right-[5px] text-white cursor-pointer">&#9733;</div>
+      <div @click="addToWishlist" :class="{ 'favorited': isCurrentPosterInWishlist }" class="poster-star text-[24px] absolute top-0 right-[5px] text-white cursor-pointer">&#9733;</div>
     </div>
   </div>
 </template>

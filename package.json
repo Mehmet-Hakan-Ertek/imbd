@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "lodash.debounce": "^4.0.8",
+    "pinia": "^2.2.4",
     "vue": "^3.4.29"
   },
   "devDependencies": {
